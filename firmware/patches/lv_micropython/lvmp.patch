@@ -1,0 +1,136 @@
+diff --git a/drivers/bus/softspi.c b/drivers/bus/softspi.c
+index 7d687a1a2..242f33417 100644
+--- a/drivers/bus/softspi.c
++++ b/drivers/bus/softspi.c
+@@ -33,8 +33,11 @@ int mp_soft_spi_ioctl(void *self_in, uint32_t cmd) {
+         case MP_SPI_IOCTL_INIT:
+             mp_hal_pin_write(self->sck, self->polarity);
+             mp_hal_pin_output(self->sck);
+-            mp_hal_pin_output(self->mosi);
+-            mp_hal_pin_input(self->miso);
++
++            if (self->flags & MP_SOFT_SPI_FLAG_MOSI_ENABLED)
++                mp_hal_pin_output(self->mosi);
++            if (self->flags & MP_SOFT_SPI_FLAG_MISO_ENABLED)
++                mp_hal_pin_input(self->miso);
+             break;
+ 
+         case MP_SPI_IOCTL_DEINIT:
+@@ -66,9 +69,13 @@ void mp_soft_spi_transfer(void *self_in, size_t len, const uint8_t *src, uint8_t
+                 src[i] : swap_bits(src[i]);
+             uint8_t data_in = 0;
+             for (int j = 0; j < 8; ++j, data_out >>= 1) {
+-                mp_hal_pin_write(self->mosi, data_out & 1);
++                if (self->flags & MP_SOFT_SPI_FLAG_MOSI_ENABLED) {
++                    mp_hal_pin_write(self->mosi, data_out & 1);
++                }
+                 mp_hal_pin_write(self->sck, 1 - self->polarity);
+-                data_in = (data_in << 1) | mp_hal_pin_read(self->miso);
++                if (self->flags & MP_SOFT_SPI_FLAG_MISO_ENABLED) {
++                    data_in = (data_in << 1) | mp_hal_pin_read(self->miso);
++                }
+                 mp_hal_pin_write(self->sck, self->polarity);
+             }
+             if (dest != NULL) {
+@@ -85,7 +92,9 @@ void mp_soft_spi_transfer(void *self_in, size_t len, const uint8_t *src, uint8_t
+             src[i] : swap_bits(src[i]);
+         uint8_t data_in = 0;
+         for (int j = 0; j < 8; ++j, data_out >>= 1) {
+-            mp_hal_pin_write(self->mosi, data_out & 1);
++            if (self->flags & MP_SOFT_SPI_FLAG_MOSI_ENABLED) {
++                mp_hal_pin_write(self->mosi, data_out & 1);
++            }
+             if (self->phase == 0) {
+                 mp_hal_delay_us_fast(delay_half);
+                 mp_hal_pin_write(self->sck, 1 - self->polarity);
+@@ -93,7 +102,9 @@ void mp_soft_spi_transfer(void *self_in, size_t len, const uint8_t *src, uint8_t
+                 mp_hal_pin_write(self->sck, 1 - self->polarity);
+                 mp_hal_delay_us_fast(delay_half);
+             }
+-            data_in = (data_in << 1) | mp_hal_pin_read(self->miso);
++            if (self->flags & MP_SOFT_SPI_FLAG_MISO_ENABLED) {
++                data_in = (data_in << 1) | mp_hal_pin_read(self->miso);
++            }
+             if (self->phase == 0) {
+                 mp_hal_delay_us_fast(delay_half);
+                 mp_hal_pin_write(self->sck, self->polarity);
+diff --git a/drivers/bus/spi.h b/drivers/bus/spi.h
+index df7f790df..5157dde70 100644
+--- a/drivers/bus/spi.h
++++ b/drivers/bus/spi.h
+@@ -38,6 +38,11 @@ typedef struct _mp_spi_proto_t {
+     void (*transfer)(void *self, size_t len, const uint8_t *src, uint8_t *dest);
+ } mp_spi_proto_t;
+ 
++enum {
++    MP_SOFT_SPI_FLAG_MOSI_ENABLED = 0x1,
++    MP_SOFT_SPI_FLAG_MISO_ENABLED = 0x2,
++};
++
+ typedef struct _mp_soft_spi_obj_t {
+     uint32_t delay_half; // microsecond delay for half SCK period
+     uint8_t polarity;
+@@ -46,6 +51,7 @@ typedef struct _mp_soft_spi_obj_t {
+     mp_hal_pin_obj_t sck;
+     mp_hal_pin_obj_t mosi;
+     mp_hal_pin_obj_t miso;
++    uint32_t flags;
+ } mp_soft_spi_obj_t;
+ 
+ extern const mp_spi_proto_t mp_soft_spi_proto;
+diff --git a/extmod/machine_spi.c b/extmod/machine_spi.c
+index 5be30e947..2cfc0ffcc 100644
+--- a/extmod/machine_spi.c
++++ b/extmod/machine_spi.c
+@@ -181,13 +181,21 @@ static mp_obj_t mp_machine_soft_spi_make_new(const mp_obj_type_t *type, size_t n
+     }
+     self->spi.firstbit = args[ARG_firstbit].u_int;
+     if (args[ARG_sck].u_obj == MP_OBJ_NULL
+-        || args[ARG_mosi].u_obj == MP_OBJ_NULL
+-        || args[ARG_miso].u_obj == MP_OBJ_NULL) {
+-        mp_raise_ValueError(MP_ERROR_TEXT("must specify all of sck/mosi/miso"));
++        || (args[ARG_mosi].u_obj == MP_OBJ_NULL && args[ARG_miso].u_obj == MP_OBJ_NULL)) {
++        mp_raise_ValueError(MP_ERROR_TEXT("must specify sck and at least one of mosi or miso"));
+     }
++
+     self->spi.sck = mp_hal_get_pin_obj(args[ARG_sck].u_obj);
+-    self->spi.mosi = mp_hal_get_pin_obj(args[ARG_mosi].u_obj);
+-    self->spi.miso = mp_hal_get_pin_obj(args[ARG_miso].u_obj);
++    self->spi.flags = 0;
++
++    if (args[ARG_mosi].u_obj != MP_OBJ_NULL && args[ARG_mosi].u_obj != mp_const_none) {
++        self->spi.mosi = mp_hal_get_pin_obj(args[ARG_mosi].u_obj);
++        self->spi.flags |= MP_SOFT_SPI_FLAG_MOSI_ENABLED;
++    }
++    if (args[ARG_miso].u_obj != MP_OBJ_NULL && args[ARG_miso].u_obj != mp_const_none) {
++        self->spi.miso = mp_hal_get_pin_obj(args[ARG_miso].u_obj);
++        self->spi.flags |= MP_SOFT_SPI_FLAG_MISO_ENABLED;
++    }
+ 
+     // configure bus
+     mp_soft_spi_ioctl(&self->spi, MP_SPI_IOCTL_INIT);
+@@ -226,10 +234,11 @@ static void mp_machine_soft_spi_init(mp_obj_base_t *self_in, size_t n_args, cons
+     if (args[ARG_sck].u_obj != MP_OBJ_NULL) {
+         self->spi.sck = mp_hal_get_pin_obj(args[ARG_sck].u_obj);
+     }
+-    if (args[ARG_mosi].u_obj != MP_OBJ_NULL) {
++
++    if (args[ARG_mosi].u_obj != MP_OBJ_NULL && args[ARG_mosi].u_obj != mp_const_none) {
+         self->spi.mosi = mp_hal_get_pin_obj(args[ARG_mosi].u_obj);
+     }
+-    if (args[ARG_miso].u_obj != MP_OBJ_NULL) {
++    if (args[ARG_miso].u_obj != MP_OBJ_NULL && args[ARG_miso].u_obj != mp_const_none) {
+         self->spi.miso = mp_hal_get_pin_obj(args[ARG_miso].u_obj);
+     }
+ 
+diff --git a/ports/esp32/boards/ESP32_GENERIC_S3/mpconfigboard.cmake b/ports/esp32/boards/ESP32_GENERIC_S3/mpconfigboard.cmake
+index 2bfdad21d..4fcc21c20 100644
+--- a/ports/esp32/boards/ESP32_GENERIC_S3/mpconfigboard.cmake
++++ b/ports/esp32/boards/ESP32_GENERIC_S3/mpconfigboard.cmake
+@@ -8,3 +8,5 @@ set(SDKCONFIG_DEFAULTS
+     boards/sdkconfig.spiram_sx
+     boards/ESP32_GENERIC_S3/sdkconfig.board
+ )
++
++set(LV_CFLAGS -DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1)
+\ No newline at end of file

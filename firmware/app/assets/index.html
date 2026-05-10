@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Age of Umbra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg-dark: #0c0a08;
+        --bg-panel: #161210;
+        --bg-card: #1e1914;
+        --bg-hover: #261f18;
+        --gold: #c8a45a;
+        --gold-bright: #e8c47a;
+        --gold-dim: #7a5e28;
+        --gold-faint: #3a2e14;
+        --text-light: #d4c5a0;
+        --text-dim: #7a6a4a;
+        --border: #3a2e18;
+        --border-active: #6a5228;
+        --max-width: 960px;
+
+        /* fire state colors */
+        --fire-extinguished: #3a3530;
+        --fire-healthy: #e07830;
+        --fire-corrupted: #38b838;
+        --fire-everburning: #e8d030;
+        --fire-ethereal: #4080d8;
+        --fire-extinguished-glow: rgba(58,53,48,0.25);
+        --fire-extinguished-glow-strong: #786f67;
+        --fire-healthy-glow: rgba(224,120,48,0.35);
+        --fire-corrupted-glow: rgba(56,184,56,0.35);
+        --fire-everburning-glow: rgba(232,208,48,0.35);
+        --fire-ethereal-glow: rgba(64,128,216,0.35);
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Cinzel', serif;
+        background: var(--bg-dark);
+        color: var(--text-light);
+        min-height: 100dvh;
+        background-image: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(100,70,20,0.12) 0%, transparent 70%);
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0;
+        background: rgba(12,10,8,0.96);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+
+      .header-inner {
+        width: 100%;
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      @media (min-width: 720px) {
+        .header-inner {
+          padding: 10px 24px;
+        }
+      }
+
+      .title {
+        font-family: 'Cinzel Decorative', serif;
+        font-size: clamp(0.95rem, 3vw, 1.25rem);
+        color: var(--gold);
+        letter-spacing: 0.12em;
+        text-shadow: 0 0 24px rgba(200,164,90,0.35);
+      }
+
+      .battery-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.82rem;
+        color: var(--text-dim);
+        position: relative;
+        cursor: default;
+      }
+
+      .bat-tooltip {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: var(--bg-panel);
+        border: 1px solid var(--border-active);
+        color: var(--text-light);
+        font-size: 0.72rem;
+        letter-spacing: 0.05em;
+        padding: 5px 10px;
+        border-radius: 3px;
+        white-space: nowrap;
+        z-index: 200;
+        pointer-events: none;
+      }
+      .battery-wrap:hover .bat-tooltip,
+      .battery-wrap:focus-within .bat-tooltip,
+      .battery-wrap.touch-open .bat-tooltip {
+        display: block;
+      }
+
+      .bat-shell {
+        position: relative;
+        width: 34px;
+        height: 15px;
+        border: 1.5px solid currentColor;
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
+      .bat-shell::after {
+        content: '';
+        position: absolute;
+        right: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 7px;
+        background: currentColor;
+        border-radius: 0 1px 1px 0;
+      }
+      .bat-fill {
+        height: 100%;
+        border-radius: 1px;
+        background: var(--gold);
+        transition: width 0.6s ease, background 0.4s ease;
+      }
+      .bat-fill.low {
+        background: #c03030;
+      }
+
+      main {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: 20px 14px 48px;
+      }
+
+      @media (min-width: 720px) {
+        main {
+          padding: 28px 24px 60px;
+        }
+      }
+
+      .section-head {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--gold-dim);
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        padding-bottom: 7px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section-head em {
+        font-style: normal;
+        color: var(--text-dim);
+        font-weight: 400;
+        letter-spacing: 0.08em;
+        text-transform: none;
+        margin-left: 6px;
+      }
+
+      .fire-section {
+        margin-bottom: 22px;
+      }
+
+      .fire-btns {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .fbtn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 9px 4px 7px;
+        min-width: 0;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 3px;
+        cursor: pointer;
+        transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+        font-family: 'Cinzel', serif;
+        font-size: 0.65rem;
+        letter-spacing: 0.04em;
+        color: var(--text-dim);
+        line-height: 1.2;
+        text-align: center;
+        user-select: none;
+      }
+
+      .fbtn-label {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .fbtn img {
+        width: 30px;
+        height: 38px;
+        object-fit: contain;
+        opacity: 0.55;
+        transition: opacity 0.18s, filter 0.18s;
+      }
+      .fbtn:hover {
+        background: var(--bg-hover);
+        border-color: var(--gold-dim);
+        color: var(--text-light);
+      }
+      .fbtn:hover img {
+        opacity: 0.85;
+      }
+      .fbtn:active {
+        transform: translateY(1px);
+      }
+
+      .fbtn[data-s="0"].on {
+        border-color: var(--fire-extinguished-glow-strong);
+        color: var(--fire-extinguished-glow-strong);
+        background: var(--fire-extinguished-glow);
+      }
+      .fbtn[data-s="1"].on {
+        border-color: var(--fire-healthy);
+        color: var(--fire-healthy);
+        background: var(--fire-healthy-glow);
+        box-shadow: 0 0 10px var(--fire-healthy-glow);
+      }
+      .fbtn[data-s="2"].on {
+        border-color: var(--fire-corrupted);
+        color: var(--fire-corrupted);
+        background: var(--fire-corrupted-glow);
+        box-shadow: 0 0 10px var(--fire-corrupted-glow);
+      }
+      .fbtn[data-s="3"].on {
+        border-color: var(--fire-everburning);
+        color: var(--fire-everburning);
+        background: var(--fire-everburning-glow);
+        box-shadow: 0 0 10px var(--fire-everburning-glow);
+      }
+      .fbtn[data-s="4"].on {
+        border-color: var(--fire-ethereal);
+        color: var(--fire-ethereal);
+        background: var(--fire-ethereal-glow);
+        box-shadow: 0 0 10px var(--fire-ethereal-glow);
+      }
+      .fbtn.on img {
+        opacity: 1;
+      }
+
+      .divider {
+        text-align: center;
+        color: var(--gold-dim);
+        font-size: 0.8rem;
+        letter-spacing: 0.6em;
+        margin: 20px 0;
+        opacity: 0.45;
+      }
+
+      .loc-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      @media (min-width: 480px) {
+        .loc-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      .lcard {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 3px;
+        overflow: hidden;
+        border: 1.5px solid var(--border);
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background: var(--bg-card);
+      }
+
+      .lcard:hover {
+        border-color: var(--gold-dim);
+      }
+
+      .lcard.sel {
+        border-color: var(--gold) !important;
+        box-shadow: 0 0 14px rgba(200,164,90,0.3);
+      }
+
+      .lcard img.li {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        opacity: 0.75;
+      }
+
+      .lcard .lg {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.75) 100%);
+        pointer-events: none;
+      }
+
+      .lcard .ln {
+        position: absolute;
+        bottom: 5px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: var(--text-light);
+        pointer-events: none;
+      }
+
+      .lcard .lfi {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 22px;
+        height: 28px;
+        object-fit: contain;
+        pointer-events: none;
+      }
+
+      .lcard .lcur {
+        position: absolute; top: 6px; left: 6px;
+        background: rgba(200,164,90,0.88);
+        color: #1a1208;
+        font-size: 0.5rem; font-weight: 700;
+        letter-spacing: 0.12em;
+        padding: 2px 5px; border-radius: 2px;
+        display: none; pointer-events: none;
+      }
+      .lcard.here .lcur { display: block; }
+
+      .lcard .ltrav {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: 22px;
+        height: 22px;
+        z-index: 10;
+        background: rgba(100,80,40,0.85);
+        color: var(--gold);
+        font-size: 0.8rem;
+        font-family: system-ui, sans-serif;
+        line-height: 1;
+        border: 1px solid var(--gold-dim);
+        border-radius: 2px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        pointer-events: auto;
+        transition: background 0.15s, color 0.15s;
+      }
+      .lcard .ltrav:hover {
+        background: rgba(200,164,90,0.88);
+        color: #1a1208;
+      }
+      .lcard:not(.here):hover .ltrav,
+      .lcard.sel:not(.here) .ltrav {
+        display: flex;
+      }
+
+      .status {
+        margin-top: 24px;
+        text-align: center;
+        font-size: 0.72rem;
+        color: var(--text-dim);
+        letter-spacing: 0.1em;
+      }
+
+      #toast {
+        position: fixed;
+        bottom: 22px;
+        left: 50%;
+        transform: translateX(-50%) translateY(60px);
+        background: var(--bg-panel);
+        border: 1px solid var(--gold-dim);
+        color: var(--text-light);
+        padding: 9px 20px;
+        border-radius: 3px;
+        font-size: 0.88rem;
+        letter-spacing: 0.05em;
+        transition: transform 0.28s cubic-bezier(.2,.8,.4,1);
+        z-index: 999;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      #toast.show {
+        transform: translateX(-50%) translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+      <div class="title">Age of Umbra</div>
+      <div class="battery-wrap" id="battery-wrap">
+        <span id="bat-charging" style="display:none; color:var(--gold);">⚡</span>
+        <div class="bat-shell">
+          <div class="bat-fill" id="bat-fill" style="width:0%"></div>
+        </div>
+        <span id="bat-pct">—</span>
+        <div class="bat-tooltip" id="bat-tooltip">—</div>
+      </div>
+      </div>
+    </header>
+
+    <main>
+      <div>
+        <div class="section-head">Locations</div>
+        <div class="loc-grid" id="loc-grid"></div>
+      </div>
+
+      <div class="divider">✦ ✦ ✦</div>
+
+      <div class="fire-section">
+        <div class="section-head" id="fire-head">Pyre State</div>
+        <div class="fire-btns" id="fire-btns">
+          <button class="fbtn" data-s="0" title="Extinguished"><img src="/assets/flame_extinguished.png" alt="" /><span class="fbtn-label">Extinguished</span></button>
+          <button class="fbtn" data-s="1" title="Healthy">    <img src="/assets/flame_healthy.png"      alt="" /><span class="fbtn-label">Healthy</span></button>
+          <button class="fbtn" data-s="2" title="Corrupted">  <img src="/assets/flame_corrupted.png"    alt="" /><span class="fbtn-label">Corrupted</span></button>
+          <button class="fbtn" data-s="3" title="Everburning"> <img src="/assets/flame_everburning.png"  alt="" /><span class="fbtn-label">Everburning</span></button>
+          <button class="fbtn" data-s="4" title="Ethereal">   <img src="/assets/flame_ethereal.png"     alt="" /><span class="fbtn-label">Ethereal</span></button>
+        </div>
+      </div>
+
+      <div class="status" id="status">Connecting…</div>
+    </main>
+
+    <div id="toast"></div>
+
+    <script>
+      let LOCS = [];
+
+      const FS = {
+        0: { name: "Extinguished", icon: "flame_extinguished", color: "var(--fire-extinguished)", glow: "var(--fire-extinguished-glow)" },
+        1: { name: "Healthy", icon: "flame_healthy", color: "var(--fire-healthy)", glow: "var(--fire-healthy-glow)" },
+        2: { name: "Corrupted", icon: "flame_corrupted", color: "var(--fire-corrupted)", glow: "var(--fire-corrupted-glow)" },
+        3: { name: "Everburning", icon: "flame_everburning", color: "var(--fire-everburning)", glow: "var(--fire-everburning-glow)" },
+        4: { name: "Ethereal", icon: "flame_ethereal", color: "var(--fire-ethereal)", glow: "var(--fire-ethereal-glow)" },
+      };
+
+      function slug(loc) {
+        return loc.toLowerCase().replace(/\s+/g, "");
+      }
+
+      const state = {
+        current_location: null,
+        fire_states: {},
+        sel: null
+      };
+
+      function connectSSE() {
+        const source = new EventSource("/subscribe");
+
+        source.onopen = () => {
+          document.getElementById("status").textContent = "Connected";
+        };
+
+        source.onmessage = (e) => {
+          const data = JSON.parse(e.data);
+          if (data.event_type === "initial_state") {
+            state.current_location = data.current_location;
+            state.fire_states = data.fire_states;
+            if (LOCS.length === 0 && data.locations) {
+              LOCS = data.locations;
+            }
+            if (!state.sel) state.sel = data.current_location;
+            document.getElementById("status").textContent = "Connected";
+          } else if (data.event_type === "fire_state_change") {
+            state.fire_states[data.location] = data.state;
+            document.getElementById("status").textContent = "Updated " + new Date().toLocaleTimeString();
+          } else if (data.event_type === "location_change") {
+            state.current_location = data.location;
+            document.getElementById("status").textContent = "Updated " + new Date().toLocaleTimeString();
+          }
+          render();
+        };
+
+        source.onerror = () => {
+          document.getElementById("status").textContent = "Reconnecting\u2026";
+        };
+
+        return source;
+      }
+
+      async function fetchBattery() {
+        try {
+          const r = await fetch("/battery");
+          const d = await r.json();
+          const pct = d.percentage;
+          const fill = document.getElementById("bat-fill");
+          fill.style.width = pct + "%";
+          fill.className = "bat-fill" + (pct < 20 ? " low" : "");
+          document.getElementById("bat-charging").style.display = d.state === "charging" ? "" : "none";
+          document.getElementById("bat-pct").textContent = pct + "%";
+          document.getElementById("bat-tooltip").textContent = d.voltage.toFixed(2) + " V" + (d.state === "charging" ? " · charging" : "");
+        } catch {}
+      }
+
+      async function setFireState(s) {
+        const loc = state.sel;
+        if (!loc) return;
+        try {
+          const r = await fetch("/state", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fire_states: { [loc]: s } }),
+          });
+          const d = await r.json();
+          if (d.error) {
+            showToast("Error: " + d.error);
+            return;
+          }
+          state.current_location = d.current_location;
+          state.fire_states = d.fire_states;
+          render();
+          showToast(loc + ": " + FS[s].name);
+        } catch {
+          showToast("Connection error");
+        }
+      }
+
+      async function setCurrentLocation(loc) {
+        try {
+          const r = await fetch("/state", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ current_location: loc }),
+          });
+          const d = await r.json();
+          if (d.error) {
+            showToast("Error: " + d.error);
+            return;
+          }
+          state.current_location = d.current_location;
+          state.fire_states = d.fire_states;
+          render();
+          showToast("Travelled to " + loc);
+        } catch {
+          showToast("Connection error");
+        }
+      }
+
+      function render() {
+        const sel = state.sel || LOCS[0];
+        const fs = state.fire_states[sel] ?? 1;
+        const info = FS[fs] || FS[1];
+
+        document.getElementById("fire-head").innerHTML = `Pyre State`;
+
+        document.querySelectorAll(".fbtn").forEach(btn => {
+          btn.classList.toggle("on", parseInt(btn.dataset.s) === fs);
+        });
+
+        const grid = document.getElementById("loc-grid");
+        if (grid.children.length === 0) {
+          LOCS.forEach(loc => {
+            const card = document.createElement("div");
+            card.className = "lcard";
+            card.id = "lc-" + slug(loc);
+            card.innerHTML = `
+              <img class="li" src="/assets/${slug(loc)}.png" alt="${loc}" />
+              <div class="lg"></div>
+              <div class="lcur">CURRENT</div>
+              <button class="ltrav" title="Travel here">&#x25B6;</button>
+              <img class="lfi" src="/assets/flame_extinguished.png" alt="" />
+              <div class="ln">${loc}</div>
+            `;
+            card.addEventListener("click", () => {
+              state.sel = loc;
+              render();
+            });
+            card.querySelector(".ltrav").addEventListener("click", e => {
+              e.stopPropagation();
+              setCurrentLocation(loc);
+            });
+            grid.appendChild(card);
+          });
+        }
+
+        LOCS.forEach(loc => {
+          const card = document.getElementById("lc-" + slug(loc));
+          if (!card) return;
+          const cfs = state.fire_states[loc] ?? 0;
+          const cinfo = FS[cfs] || FS[0];
+
+          card.querySelector(".lfi").src = `/assets/${cinfo.icon}.png`;
+          card.classList.toggle("sel", loc === sel);
+          card.classList.toggle("here", loc === state.current_location);
+
+          if (loc === sel) {
+            card.style.borderColor = cinfo.color;
+            card.style.boxShadow = `0 0 12px ${cinfo.glow}`;
+          } else {
+            card.style.borderColor = "";
+            card.style.boxShadow = "";
+          }
+        });
+      }
+
+      let toastTimer;
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+      }
+
+      document.querySelectorAll(".fbtn").forEach(btn => {
+        btn.addEventListener("click", () => setFireState(parseInt(btn.dataset.s)));
+      });
+
+      const batWrap = document.getElementById("battery-wrap");
+      batWrap.addEventListener("touchstart", e => {
+        e.preventDefault();
+        batWrap.classList.toggle("touch-open");
+      }, { passive: false });
+      document.addEventListener("touchstart", e => {
+        if (!batWrap.contains(e.target)) batWrap.classList.remove("touch-open");
+      });
+
+      const sse = connectSSE();
+      window.addEventListener("beforeunload", () => sse.close());
+      fetchBattery();
+      setInterval(fetchBattery, 30000);
+    </script>
+  </body>
+</html>
