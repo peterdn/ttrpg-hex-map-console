@@ -94,6 +94,14 @@ esptool.py --chip esp32s3 --port <PORT> write_flash -z 0x0 lvmp/ports/esp32/buil
 
 ## Age of Umbra app
 
+**Set WiFi credentials**
+
+Rename the template configuration file from `config.json.template` to `config.json` and enter your WiFi credentials so the device can connect.
+
+**FIXME**: the app is liable to hang if it is unable to connect to WiFi.
+
+**Install app**
+
 To install the app on an ESP32-S3, copy the entire contents of `app/` to the root of the device using `mpremote`:
 
 ```bash
