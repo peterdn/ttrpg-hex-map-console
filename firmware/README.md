@@ -120,3 +120,12 @@ python -m tools.serve_http_app
 ```
 
 Access the app at http://localhost:5000.
+
+## Asset attribution
+
+- age_of_umbra.png -- from Darrington Press Daggerheart Age of Umbra mini-series, 2025 [announcment](https://darringtonpress.com/daggerheart-age-of-umbra-mini-series-coming-to-critical-role-may-29th/) (fair use).
+- blacktower.png -- from "Chepstow Castle" by artist John Martin, [painted 1815](https://commons.wikimedia.org/wiki/File:John_Martin_-_Moonlight_-_Chepstow_Castle_-_Google_Art_Project.jpg).
+- flame\_\* -- from [Flames SVG free download](https://svgcrown.com/download.php?category=flames&id=1) @ svgcrown.com.
+- galestone.png -- from "Festivities in Windsor Castle" by artist Paul Sandby, [painted 1776](https://en.wikipedia.org/wiki/Guy_Fawkes_Night#/media/File:Windsor_castle_guyfawkesnight1776.jpg)
+- paleburg.png -- from [Daggerheart Core Rulebook](https://www.daggerheart.com/buy/) p280 Chapter 5: The Age of Umbra, 2025 (fair use).
+- ransfall.png -- from "Ruins of an Ancient City" by artist John Martin, [painted between 1810-1820](https://artsandculture.google.com/asset/ruins-of-an-ancient-city-john-martin-british-1789%E2%80%931854/dAHVu0DaiYAoIg?hl=en).
