@@ -35,8 +35,8 @@ class TLC5974:
         self.latch.value(0)
 
     def set_rgb(self, c: int, r: float, g: float, b: float):
-        if c < 0 or c > 8:
-            raise ValueError("Channel must be between 0 and 8")
+        if c < 0 or c > 7:
+            raise ValueError("Channel must be between 0 and 7")
 
         r = max(0.0, min(1.0, r))
         g = max(0.0, min(1.0, g))
