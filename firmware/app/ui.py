@@ -33,9 +33,9 @@ class UserInterface:
     Creates a 2-tile LVGL tileview:
     - The main tile displays the current location and fire state.
       Swiping left/right changes location, tapping the fire icon
-      cycles through fire states. Swiping up accesses the settings tile.
+      cycles through fire states. Swiping down accesses the settings tile.
     - The settings tile displays network and battery status.
-      Swiping down returns to the main tile.
+      Swiping up returns to the main tile.
 
     Also manages the state of the fire LEDs via the TLC5947 driver.
 
