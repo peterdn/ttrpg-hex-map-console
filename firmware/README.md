@@ -121,7 +121,33 @@ python -m tools.serve_http_app
 
 Access the app at http://localhost:5000.
 
-## Asset attribution
+## Assets
+
+Original images live in `assets/` as PNGs. They are pre-converted into LVGL's binary format in `app/assets/` for deployment to the device.
+
+### Converting assets to LVGL .bin format
+
+Use the [LVGLImage.py](https://github.com/lvgl/lvgl/blob/master/scripts/LVGLImage.py) tool within `lvmp/user_modules/lv_binding_micropython/lvgl/scripts`.
+
+From within the `firmware` directory:
+
+```bash
+pip install -r lvmp/user_modules/lv_binding_micropython/lvgl/scripts/prerequisites-pip.txt
+```
+
+**Full-screen images**: town backgrounds and the splash screen convert to `RGB565` format (no transparency). For example:
+
+```bash
+python lvmp/user_modules/lv_binding_micropython/lvgl/scripts/LVGLImage.py --ofmt BIN --cf RGB565 -o app/assets/ assets/galestone.png
+```
+
+**Flame icons** are drawn on top of the background and need an alpha channel to preserve transparency, so convert these to `RGB565A8` format. For example:
+
+```bash
+python lvmp/user_modules/lv_binding_micropython/lvgl/scripts/LVGLImage.py --ofmt BIN --cf RGB565A8 -o app/assets/ assets/flame_everburning.png
+```
+
+### Attribution
 
 - age_of_umbra.png -- from Darrington Press Daggerheart Age of Umbra mini-series, 2025 [announcement](https://darringtonpress.com/daggerheart-age-of-umbra-mini-series-coming-to-critical-role-may-29th/) (fair use).
 - blacktower.png -- from "Chepstow Castle" by artist John Martin, [painted 1815](https://commons.wikimedia.org/wiki/File:John_Martin_-_Moonlight_-_Chepstow_Castle_-_Google_Art_Project.jpg).
