@@ -35,7 +35,7 @@ class BatteryState:
 
         return round(self._voltage_ema.value, 2)
 
-    def get_battery_state(self) -> Tuple[str, float]:
+    def get_battery_state(self) -> tuple[str, float]:
         # This board has no way to directly detect whether it is on USB power, running on battery,
         # charging, or discharging. Instead we infer the state from the voltage: if above 3.6V we
         # assume that it's on USB power and therefore charging. The % charge is then approximated
