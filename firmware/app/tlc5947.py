@@ -10,7 +10,7 @@ from machine import Pin, SoftSPI
 import time
 
 
-class TLC5974:
+class TLC5947:
     def __init__(self, clk_pin, data_pin, latch_pin, freq=400000):
         if isinstance(clk_pin, int):
             clk_pin = Pin(clk_pin, Pin.OUT)

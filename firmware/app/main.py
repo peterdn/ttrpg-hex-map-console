@@ -9,7 +9,7 @@ from config import Config
 from cst816s_drv import CST816S
 from game_state import GameState
 from http_app import HttpApp
-from tlc5947 import TLC5974
+from tlc5947 import TLC5947
 from ui import UserInterface, ui_task
 from wifi import connect_to_wifi
 
@@ -34,7 +34,7 @@ async def main():
     # NOTE: the variable is unused but the object sets up some global LVGL state
     cache_fs = CacheFS(cache_size=32768)
 
-    tlc5947 = TLC5974(clk_pin=16, data_pin=17, latch_pin=18, freq=400000)
+    tlc5947 = TLC5947(clk_pin=16, data_pin=17, latch_pin=18, freq=400000)
 
     battery_state = BatteryState()
 

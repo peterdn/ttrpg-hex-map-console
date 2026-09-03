@@ -9,7 +9,7 @@ from battery import BatteryState
 from cst816s_drv import CST816S
 from game_state import FireState, GameState
 from led_state import LEDState
-from tlc5947 import TLC5974
+from tlc5947 import TLC5947
 
 
 async def ui_task():
@@ -46,7 +46,7 @@ class UserInterface:
     def __init__(
         self,
         cst816s: CST816S,
-        tlc5947: TLC5974,
+        tlc5947: TLC5947,
         game_state: GameState,
         battery_state: BatteryState,
     ):
