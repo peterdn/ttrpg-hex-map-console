@@ -47,12 +47,12 @@ A custom firmware image was built using:
 
 **Check out lv_micropython and apply patch**
 
-This patch is required to set a few build configurations, and enable the use of MicroPython's SoftSPI without specifying MISO pin, as we want to use this to drive the TLC5947 LED driver but it is a write-only device.
+This patch is required to set a few build configurations (including the `LV_COLOR_DEPTH=16` and `LV_COLOR_16_SWAP=1` LVGL flags, which the GC9A01 needs), and enable the use of MicroPython's SoftSPI without specifying MISO pin, as we want to use this to drive the TLC5947 LED driver but it is a write-only device.
 
 From within `firmware` directory:
 
 ```bash
-git clone git@github.com:lvgl-micropython/lvgl_micropython.git lvmp
+git clone https://github.com/lvgl/lv_micropython.git lvmp
 cd lvmp
 git checkout acfeb7b7ead9eedc636d2d82c8a8d9908ea5ffac
 git apply ../patches/lv_micropython/lvmp.patch
@@ -65,7 +65,7 @@ This patch is required to disable linking of `tjpg` library to avoid conflicts w
 From within `firmware` directory:
 
 ```bash
-git clone git@github.com:russhughes/gc9a01_mpy.git
+git clone https://github.com/russhughes/gc9a01_mpy.git
 cd gc9a01_mpy
 git checkout 6ceba791a462bc5764d8340c2af0d0c3f77fb4d3
 git apply ../patches/gc9a01_mpy/gc9a01mpy.patch
@@ -80,7 +80,7 @@ cd lvmp
 git submodule update --init --recursive user_modules/lv_binding_micropython
 make -C mp-cross
 cd ports/esp32
-make USER_C_MODULES=../../../gc9a01_mpy/src/micropython.cmake BOARD=ESP32_GENERIC_S3 LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" all
+make USER_C_MODULES=../../../gc9a01_mpy/src/micropython.cmake BOARD=ESP32_GENERIC_S3 all
 ```
 
 **Flash the firmware**
