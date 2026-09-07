@@ -27,9 +27,22 @@ This directory contains the custom-designed and specialised 3D assets for the pr
 **Enclosure**
 
 - Printer: Bambu Lab A1 (FDM).
-- Settings: 0.20mm "standard".
+- Settings: 0.20mm "standard", modified as below for the main body printed on its side.
 - Filament: Elegoo Rapid PLA+ Black.
-- Notes: The body was printed in one piece on its side, arranged diagonally across the build plate. Despite lowering nozzle speeds and other settings to prevent vibrations from affecting the print as it grew taller, there was some "wavy" artifacting on the top edge. Ideally one would use a printer with a sufficiently large build plate to print this flat. I judged that the lid would be far too precarious to print on its side, so I had to print it flat in two pieces.
+- Notes: The body was printed in one piece on its side, arranged diagonally across the build plate. Despite lowering nozzle speeds and other settings (see table below) to prevent vibrations from affecting the print as it grew taller, there was some "wavy" artifacting on the top edge. Ideally one would use a printer with a sufficiently large build plate to print this flat. I judged that the lid would be far too precarious to print on its side, so I had to print it flat in two pieces.
+
+| Page   | Section            | Setting         | Value                |
+| ------ | ------------------ | --------------- | -------------------- |
+| Others | Brim               | Brim type       | Outer brim only      |
+| Others | Brim               | Brim width      | 15mm                 |
+| Speed  | Other layers speed | Outer wall      | 60mm/s               |
+| Speed  | Other layers speed | Inner wall      | 120mm/s              |
+| Speed  | Other layers speed | Gap infill      | 100mm/s              |
+| Speed  | Other layers speed | Support         | 120mm/s              |
+| Speed  | Travel speed       | Travel          | 250mm/s              |
+| Speed  | Acceleration       | Normal printing | 3000mm/s<sup>2</sup> |
+| Speed  | Acceleration       | Outer wall      | 2000mm/s<sup>2</sup> |
+| Speed  | Acceleration       | Travel          | 3000mm/s<sup>2</sup> |
 
 **Flame caps**
 
